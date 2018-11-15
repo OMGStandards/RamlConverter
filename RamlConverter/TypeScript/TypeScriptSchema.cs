@@ -7,23 +7,25 @@ namespace RamlConverter.TypeScript
 {
     public class TypeScriptSchema
     {
+        public int? IndentSize { get; set; }
+        public bool DisableTSLine { get; set; }
         public Dictionary<string, string> Imports { get; set; }
-       
        
         public List<TypeScriptType> Types { get; set; }
 
         public void Write (StreamWriter writer)
         {
+            if(this.DisableTSLine)
+            {
+                WriteDisableTSLint(writer);
+            }
+
             WriteImports(writer);
 
-           
-
-            if(this.Types != null)
+            if (this.Types != null)
             {
                 WriteTypes(writer);
             }
-
-           
         }
 
         private void WriteTypes(StreamWriter writer)
@@ -92,7 +94,7 @@ namespace RamlConverter.TypeScript
         private void WriteEnumMember(StreamWriter writer, string enumMember, bool last)
         {
             string endOfEnum = last ? "" : ",";            
-            writer.WriteLine(Tab(2) + "{0} = \"{0}\"{1}", enumMember, endOfEnum);
+            writer.WriteLine(Tab(1) + "{0} = \"{0}\"{1}", enumMember, endOfEnum);
         }
 
         private void WriteArrayTypeHeader(StreamWriter writer, TypeScriptType type)
@@ -110,7 +112,7 @@ namespace RamlConverter.TypeScript
 
             if (string.IsNullOrEmpty(property.ArrayItemName))
             {
-                writer.WriteLine(Tab(1) + "@XMLChild()");
+                writer.WriteLine(Tab(1) + "@XMLChild({})");
             }
             else
             {
@@ -144,6 +146,7 @@ namespace RamlConverter.TypeScript
 
         private void WriteTypeHeader(StreamWriter writer, TypeScriptType type)
         {
+            writer.WriteLine("@XMLElement({{root: \"{0}\"}})", System.Char.ToLowerInvariant(type.Name[0]) + type.Name.Substring(1));
             writer.WriteLine("export class {0} {{", type.Name);                   
         }
 
@@ -165,19 +168,23 @@ namespace RamlConverter.TypeScript
             return comment.Split(slashDelimiter, StringSplitOptions.RemoveEmptyEntries);        
         }
 
-        
-
         private void WriteImports(StreamWriter writer)
         {
-            writer.WriteLine("import {xml, XMLAttribute, XMLChild, XMLElement} from \"xml-decorators\";");
+            writer.WriteLine("import {XMLChild, XMLElement} from \"xml-decorators\";");
 
             if (Imports == null)
+            {
+                writer.WriteLine();
                 return;
+            }
 
             if (Imports.Count == 0)
+            {
+                writer.WriteLine();
                 return;
+            }
 
-            foreach(string importKey in Imports.Keys)
+            foreach (string importKey in Imports.Keys)
             {
                 writer.WriteLine("import * as {0} from \"./{1}\";", importKey, Imports[importKey]);
 
@@ -185,10 +192,21 @@ namespace RamlConverter.TypeScript
             writer.WriteLine();
         }
 
-        private string Tab(int numberOfTabs)
+        private void WriteDisableTSLint(StreamWriter writer)
         {
-            return new string('\t', numberOfTabs);
+            writer.WriteLine("/* tslint:disable */");
         }
 
+        private string Tab(int numberOfTabs)
+        {
+            if (this.IndentSize.HasValue)
+            {
+                return new string(' ', numberOfTabs * this.IndentSize.Value);
+            }
+            else
+            {
+                return new string('\t', numberOfTabs);
+            }
+        }
     }
 }

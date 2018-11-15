@@ -10,5 +10,7 @@ namespace RamlConverter
         public string CSharpNamespace { get; set; }
         public bool GenerateDescriptions { get; set; }   
         public string OutputDirectory { get; set; }
+        public int? IndentSize { get; set; }
+        public bool DisableTSLint { get; set; }
     }
 }

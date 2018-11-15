@@ -231,24 +231,21 @@ namespace RamlConverter
                     ramlProperty.Type = properties[key] as string;
                 }
 
-                if(IsArray(ramlProperty.Type))
-                {
-                    // check if we have item name
-                    var itemName = GetValueByKey(property, StringConstants.ItemName) as string;
+                var itemName = GetValueByKey(property, StringConstants.ItemName) as string;
 
-                    if (string.IsNullOrEmpty(itemName))
+                if (!string.IsNullOrEmpty(itemName))
+                {
+                    ramlProperty.ArrayItemName = itemName;
+                }
+                else if (IsArray(ramlProperty.Type))
+                {
+                    var ramlPropertyTypeName = GetRefDataType(ramlProperty.Type);
+                    if (!string.IsNullOrEmpty(ramlPropertyTypeName))
                     {
-                        var ramlPropertyTypeName = GetRefDataType(ramlProperty.Type);
-                        if (!string.IsNullOrEmpty(ramlPropertyTypeName))
-                        {
-                            itemName = GetCollectionItemName(ramlPropertyTypeName);
-                        }
-                        
+                        itemName = GetCollectionItemName(ramlPropertyTypeName);
                     }
                     ramlProperty.ArrayItemName = itemName;
                 }
-
-                
 
                 ramlProperties.Add(ramlProperty);
             }

@@ -37,6 +37,7 @@ namespace RamlConverter
             bool generateTypeScript = appconfig.GenerateTypeScriptCode.HasValue ? appconfig.GenerateTypeScriptCode.Value : false;
             bool generateDescriptions = appconfig.GenerateDescriptions.HasValue ? appconfig.GenerateDescriptions.Value : false;
             RootTypeNames = appconfig.RootTypes;
+            
 
             if (inputDirectory == null)
             {
@@ -54,6 +55,7 @@ namespace RamlConverter
             string csOutputDirectory = null;
             string jsonOutputDirectory = null;
             string tsOutputDirectory = null;
+            int? tsIndentSize = null;
 
             var csconfig = new CSharpConfig();
             Configuration.GetSection(ConfigurationStrings.CSharpSectionName).Bind(csconfig);
@@ -62,7 +64,19 @@ namespace RamlConverter
 
             var tsonconfig = new TypeScriptConfig();
             Configuration.GetSection(ConfigurationStrings.TypeScriptSectionName).Bind(tsonconfig);
-            tsOutputDirectory = tsonconfig.OutputDirectory;
+            bool tsDisableTSLint = false;
+            if (tsonconfig != null)
+            {
+                tsOutputDirectory = tsonconfig.OutputDirectory;
+                if(tsonconfig.IndentSize.HasValue)
+                {
+                    tsIndentSize = tsonconfig.IndentSize.Value;
+                }
+                if (tsonconfig.DisableTSLint.HasValue)
+                {
+                    tsDisableTSLint = tsonconfig.DisableTSLint.Value;
+                }
+            }
 
             var jsonconfig = new JsonSchemaConfig();
             Configuration.GetSection(ConfigurationStrings.JsonSectionName).Bind(jsonconfig);
@@ -73,6 +87,7 @@ namespace RamlConverter
             xmlNamespace = xmlconfig.Namespace;
             xmlOutputDirectory = xmlconfig.OutputDirectory;
 
+            
             // override using input parameters
             foreach (string arg in args)
             {
@@ -164,6 +179,12 @@ namespace RamlConverter
                     {
                         options.OutputDirectory = tsOutputDirectory;
                     }
+                    if (tsIndentSize.HasValue)
+                    {
+                        options.IndentSize = tsIndentSize;
+                    }
+
+                    options.DisableTSLint = tsDisableTSLint;
 
                     var typeScriptConverter = new TypeScriptConverter(ramlFile);
                     typeScriptConverter.ConvertRaml(options);

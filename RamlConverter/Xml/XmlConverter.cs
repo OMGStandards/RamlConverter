@@ -74,7 +74,7 @@ namespace RamlConverter.Xml
 
             var element = new XmlSchemaElement();
             element.Name = System.Char.ToLowerInvariant(ramlType.Name[0]) + ramlType.Name.Substring(1);
-            element.SchemaTypeName = new XmlQualifiedName(ramlType.Name, Namespaces.XmlSchema); 
+            element.SchemaTypeName = new XmlQualifiedName(ramlType.Name); 
 
             schema.Items.Add(element);
 

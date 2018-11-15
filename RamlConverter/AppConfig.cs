@@ -37,6 +37,8 @@ namespace RamlConverter
     public class TypeScriptConfig
     {
         public string OutputDirectory { get; set; }
+        public int? IndentSize { get; set; }
+        public bool? DisableTSLint { get; set; }
     }
 
 }

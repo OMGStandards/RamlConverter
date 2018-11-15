@@ -28,6 +28,11 @@ namespace RamlConverter.TypeScript
 
         protected override void InitializeSchema(TypeScriptSchema schema, ConversionOptions options)
         {
+            if (options.IndentSize.HasValue)
+            {
+                schema.IndentSize = options.IndentSize;
+            }
+            schema.DisableTSLine = options.DisableTSLint;
         }
 
         protected override void FinalizeSchema(TypeScriptSchema schema, ConversionOptions options)
@@ -81,7 +86,7 @@ namespace RamlConverter.TypeScript
 
                 if (arrayElementTypeName == null)
                 {
-                    arrayElementTypeName = GetRefDataType(ramlType.Array.ItemsTypeName);
+                    arrayElementTypeName = ramlType.Array.ItemsTypeName;
                 }
 
                 if (arrayElementTypeName != null)
@@ -159,9 +164,7 @@ namespace RamlConverter.TypeScript
                 schema.Write(streamWriter);
             }
         }
-
         #endregion
-
 
         private string RamlDataTypeToTypeScriptDataType(string ramlDataType)
         {
