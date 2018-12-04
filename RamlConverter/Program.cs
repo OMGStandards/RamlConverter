@@ -59,7 +59,10 @@ namespace RamlConverter
 
             var csconfig = new CSharpConfig();
             Configuration.GetSection(ConfigurationStrings.CSharpSectionName).Bind(csconfig);
-            csNamespace = csconfig.Namespace;
+            if (!string.IsNullOrEmpty(csconfig.Namespace))
+            {
+                csNamespace = csconfig.Namespace;
+            }
             csOutputDirectory = csconfig.OutputDirectory;
 
             var tsonconfig = new TypeScriptConfig();

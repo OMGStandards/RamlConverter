@@ -18,7 +18,7 @@
     {
         internal const string XmlSectionName = "XmlSchema";
         internal const string JsonSectionName = "JsonSchema";
-        internal const string CSharpSectionName = "CShart";
+        internal const string CSharpSectionName = "CSharp";
         internal const string TypeScriptSectionName = "TypeScript";
     }
 
