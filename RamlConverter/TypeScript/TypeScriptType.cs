@@ -9,6 +9,7 @@ namespace RamlConverter.TypeScript
         public List<TypeScriptProperty> Properties { get; set; }
         public List<string> BaseTypeName { get; set; }  // no support for multiple inheritance       
         public TypeScriptArray Array { get; set; }
-        public TypeScriptEnum Enum { get; set; }        
+        public TypeScriptEnum Enum { get; set; }
+        public bool IsRootType { get; set; }
     }
 }

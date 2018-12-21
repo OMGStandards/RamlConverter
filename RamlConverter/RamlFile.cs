@@ -102,7 +102,7 @@ namespace RamlConverter
                         ramlArray.ItemsTypeName = GetValueByKey(type, RamlKeywords.Items) as string;
 
                     }
-                    else if(baseTypeName.Length > StringConstants.Collection.Length)
+                    else if(baseTypeName.Length >= StringConstants.Collection.Length)
                     {
                         if (baseTypeName.Substring(baseTypeName.Length - StringConstants.Collection.Length).Equals(StringConstants.Collection, StringComparison.InvariantCulture))
                         {

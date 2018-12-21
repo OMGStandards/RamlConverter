@@ -33,6 +33,7 @@ namespace RamlConverter.TypeScript
                 schema.IndentSize = options.IndentSize;
             }
             schema.DisableTSLine = options.DisableTSLint;
+            schema.XmlNamespace = options.XmlNamespace;
         }
 
         protected override void FinalizeSchema(TypeScriptSchema schema, ConversionOptions options)
@@ -50,6 +51,8 @@ namespace RamlConverter.TypeScript
 
             var typeScriptType = new TypeScriptType();
             typeScriptType.Name = ramlType.Name;
+
+            typeScriptType.IsRootType = ramlType.IsRootType;
 
             // check if it is enum
             if (ramlType.Enum != null)
@@ -114,7 +117,16 @@ namespace RamlConverter.TypeScript
                 var typeScriptProperty = new TypeScriptProperty();
                 typeScriptProperty.Name = ramlProperty.Name;
 
-                var typeName = RamlDataTypeToTypeScriptDataType(ramlProperty.Type);
+                string typeName = null;
+
+                if (IsDecimalString(ramlProperty.Type))
+                {
+                    typeName = TypeScriptDataTypes.String;
+                }
+                else
+                {
+                    typeName = RamlDataTypeToTypeScriptDataType(ramlProperty.Type);
+                }
 
                 if (typeName != null)
                 {

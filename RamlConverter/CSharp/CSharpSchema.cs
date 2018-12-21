@@ -36,7 +36,12 @@ namespace RamlConverter.CSharp
 
             foreach(CSharpType type in this.Types)
             {
-                WriteType(writer, type);
+                // we do not create C# DecimalString type since you cannot derive from string
+                // instead we just map DecimalString to C# string type
+                if (type.Name != SpecialTypes.DecimalString)
+                {
+                    WriteType(writer, type);
+                }
             }
         }
 
@@ -94,13 +99,13 @@ namespace RamlConverter.CSharp
         {
             string endOfEnum = last ? "" : ",";
             writer.WriteLine(Tab(2) + "[EnumMember(Value = \"{0}\")]", enumMember);
-            writer.WriteLine(Tab(2) + "{0}{1}", enumMember, endOfEnum);
+            writer.WriteLine(Tab(2) + "{0}{1}", UppercaseFirst(enumMember), endOfEnum);
         }
 
         private void WriteArrayTypeHeader(StreamWriter writer, CSharpType type)
         {
             writer.WriteLine(Tab(1) + "[CollectionDataContract(Namespace = \"{0}\", ItemName = \"{1}\")]", this.XmlNamespace, type.Array.ItemName);
-            writer.WriteLine(Tab(1) + "public class {0}", type.Name);
+            writer.WriteLine(Tab(1) + "public partial class {0} : List<{1}>", type.Name, type.Array.ItemsTypeName);
             writer.WriteLine(Tab(1) + "{");
         }
 
@@ -119,17 +124,18 @@ namespace RamlConverter.CSharp
                     property.Type == CSharpDataTypes.Integer
                 ) ? property.Type + "?" : property.Type;
 
+
             if (property.Required)
             {
-                writer.WriteLine(Tab(2) + "[DataMember(IsRequired = true, Order = {0})]", propertyOrder);
-                writer.WriteLine(Tab(2) + "[JsonProperty(Required = Required.Always, Order = {0})]", propertyOrder);
-                writer.WriteLine(Tab(2) + "public {0} {1} {{ get; set; }}", property.Type, property.Name);
+                writer.WriteLine(Tab(2) + "[DataMember(IsRequired = true, Order = {0}, Name = \"{1}\")]", propertyOrder, property.Name);
+                writer.WriteLine(Tab(2) + "[JsonProperty(Required = Required.Always, Order = {0}, PropertyName = \"{1}\")]", propertyOrder, property.Name);
+                writer.WriteLine(Tab(2) + "public {0} {1} {{ get; set; }}", property.Type, UppercaseFirst(property.Name));
             }
             else
             {
-                writer.WriteLine(Tab(2) + "[DataMember(EmitDefaultValue = false, Order = {0})]", propertyOrder);
-                writer.WriteLine(Tab(2) + "[JsonProperty(NullValueHandling = NullValueHandling.Ignore, Order = {0})]", propertyOrder);
-                writer.WriteLine(Tab(2) + "public {0} {1} {{ get; set; }}", optionalDataType, property.Name);
+                writer.WriteLine(Tab(2) + "[DataMember(EmitDefaultValue = false, Order = {0}, Name = \"{1}\")]", propertyOrder, property.Name);
+                writer.WriteLine(Tab(2) + "[JsonProperty(NullValueHandling = NullValueHandling.Ignore, Order = {0}, PropertyName = \"{1}\")]", propertyOrder, property.Name);
+                writer.WriteLine(Tab(2) + "public {0} {1} {{ get; set; }}", optionalDataType, UppercaseFirst(property.Name));
             }
             writer.WriteLine();
         }
@@ -154,7 +160,7 @@ namespace RamlConverter.CSharp
         private void WriteTypeHeader(StreamWriter writer, CSharpType type)
         {
             writer.WriteLine(Tab(1) + "[DataContract(Namespace = \"{0}\")]", this.XmlNamespace);
-            writer.WriteLine(Tab(1) + "public class {0}", type.Name);
+            writer.WriteLine(Tab(1) + "public partial class {0}", type.Name);
             writer.WriteLine(Tab(1) + "{");            
         }
 
@@ -211,6 +217,17 @@ namespace RamlConverter.CSharp
         private string Tab(int numberOfTabs)
         {
             return new string('\t', numberOfTabs);
+        }
+
+        private string UppercaseFirst(string s)
+        {
+            if (string.IsNullOrEmpty(s))
+            {
+                return null;
+            }
+            char[] a = s.ToCharArray();
+            a[0] = char.ToUpper(a[0]);
+            return new string(a);
         }
 
     }

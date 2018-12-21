@@ -7,6 +7,7 @@ namespace RamlConverter.TypeScript
 {
     public class TypeScriptSchema
     {
+        public string XmlNamespace { get; set; }
         public int? IndentSize { get; set; }
         public bool DisableTSLine { get; set; }
         public Dictionary<string, string> Imports { get; set; }
@@ -38,7 +39,12 @@ namespace RamlConverter.TypeScript
 
             foreach(TypeScriptType type in this.Types)
             {
-                WriteType(writer, type);
+                // we do not create TypeScrips DecimalString type since you cannot extend
+                // string type. Instead we just map DecimalString to string
+                if (type.Name != SpecialTypes.DecimalString)
+                {
+                    WriteType(writer, type);
+                }
             }
         }
 
@@ -79,8 +85,11 @@ namespace RamlConverter.TypeScript
                         var property = type.Properties[i];
                         WriteProperty(writer, property, i);
                     }
-                }     
-
+                }
+                if (type.IsRootType)
+                {
+                    WriteNamespaceHandler(writer, type);
+                }
             }           
 
             WriteTypeFooter(writer);
@@ -124,18 +133,35 @@ namespace RamlConverter.TypeScript
 
             var propertyName = property.Required ? property.Name : property.Name + StringConstants.QuestionMark;
             writer.WriteLine(Tab(1) + "public {0}: {1};", propertyName, property.Type);
-           
+            writer.WriteLine();
+
         }
 
         private void WritePropertyComment(StreamWriter writer, string comment)
         {
-            writer.WriteLine(Tab(2) + "/**");
+            writer.WriteLine(Tab(1) + "/**");
             var commentLines = SplitComment(comment);
             foreach (string commentLine in commentLines)
             {
-                writer.WriteLine(Tab(2) + "* {0}", commentLine);
+                writer.WriteLine(Tab(1) + "* {0}", commentLine);
             }
-            writer.WriteLine(Tab(2) + "*/");
+            writer.WriteLine(Tab(1) + "**/");
+        }
+
+        private void WriteNamespaceHandler(StreamWriter writer, TypeScriptType type)
+        {
+            writer.WriteLine();
+            writer.WriteLine(Tab(1) + "// default namespace");
+            writer.WriteLine(Tab(1) + "@XMLAttribute({name: \"xmlns\"})");
+            writer.WriteLine(Tab(1) + "public defaultXmlNamespace?: string;");
+            writer.WriteLine();
+            writer.WriteLine(Tab(1) + "public enableDefaultXmlNamespace(): void {");
+            writer.WriteLine(Tab(2) + "this.defaultXmlNamespace = \"{0}\";",this.XmlNamespace);
+            writer.WriteLine(Tab(1) + "}");
+            writer.WriteLine();
+            writer.WriteLine(Tab(1) + "public disableDefaultXmlNamespace(): void {");
+            writer.WriteLine(Tab(2) + "this.defaultXmlNamespace = undefined;");
+            writer.WriteLine(Tab(1) + "}");
         }
 
         private void WriteTypeFooter(StreamWriter writer)
@@ -170,7 +196,7 @@ namespace RamlConverter.TypeScript
 
         private void WriteImports(StreamWriter writer)
         {
-            writer.WriteLine("import {XMLChild, XMLElement} from \"xml-decorators\";");
+            writer.WriteLine("import {XMLAttribute, XMLChild, XMLElement} from \"xml-decorators\";");
 
             if (Imports == null)
             {

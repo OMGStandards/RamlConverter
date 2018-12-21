@@ -1,7 +1,8 @@
 {
   "profiles": {
     "RamlConverter": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "commandLineArgs": "/desc"
     }
   }
 }

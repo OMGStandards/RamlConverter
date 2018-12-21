@@ -123,7 +123,16 @@ namespace RamlConverter.CSharp
                 var csharpProperty = new CSharpProperty();
                 csharpProperty.Name = ramlProperty.Name;
 
-                var typeName = RamlDataTypeToCSharpDataType(ramlProperty.Type);
+                string typeName = null;
+
+                if(IsDecimalString(ramlProperty.Type))
+                {
+                    typeName = CSharpDataTypes.String;
+                }
+                else
+                {
+                    typeName = RamlDataTypeToCSharpDataType(ramlProperty.Type);
+                }
 
                 if (typeName == null)
                 {

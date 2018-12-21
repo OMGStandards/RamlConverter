@@ -85,5 +85,31 @@ namespace RamlConverter
                 return null;
             }
         }
+
+        protected bool IsDecimalString(string ramlType)
+        {
+
+            if(string.IsNullOrEmpty(ramlType))
+            {
+                return false;
+            }
+
+            char[] dotDelimiter = { '.' };
+
+            var referenceAndTypeName = ramlType.Split(dotDelimiter, StringSplitOptions.RemoveEmptyEntries);
+
+            string typeName = null;
+
+            typeName = referenceAndTypeName[referenceAndTypeName.Length - 1];
+
+            if (typeName == SpecialTypes.DecimalString)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
     }
 }

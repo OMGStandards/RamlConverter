@@ -89,6 +89,12 @@
         internal const string Nil = "nil";
     }
 
+    internal static class SpecialTypes
+    {
+        internal const string DecimalString = "DecimalString";
+        internal const string Collection = "Collection";
+    }
+
 
     internal static class RamlKeywords
     {
